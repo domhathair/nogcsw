@@ -1,0 +1,36 @@
+{
+	"authors": [
+		"Alexander Chepkov"
+	],
+	"copyright": "Copyright © 2025, Alexander Chepkov",
+	"description": "Simple stopwatch timer implementation for D (-betterC, @nogc)",
+	"license": "boost",
+	"name": "nogcsw",
+	"version": "0.1.0",
+	"importPaths": [
+		"source"
+	],
+	"sourcePaths": [
+		"source"
+	],
+	"configurations": [
+		{
+			"name": "default",
+			"targetType": "library"
+		},
+		{
+			"name": "nogc",
+			"targetType": "library",
+			"dflags": [
+				"-betterC"
+			]
+		},
+		{
+			"name": "unittest",
+			"targetType": "library",
+			"dflags": [
+				"-betterC"
+			]
+		}
+	]
+}
