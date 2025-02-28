@@ -5,7 +5,7 @@ __dummy.html
 docs/
 nogcsw
 nogcsw.[exe|o|so|obj|lst]
-nogcsw-*
+nogcsw-test*
 *.so
 *.dylib
 *.dll

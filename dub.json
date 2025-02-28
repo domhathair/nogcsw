@@ -6,7 +6,7 @@
 	"description": "Simple stopwatch timer implementation for D (-betterC, @nogc)",
 	"license": "boost",
 	"name": "nogcsw",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"importPaths": [
 		"source"
 	],
