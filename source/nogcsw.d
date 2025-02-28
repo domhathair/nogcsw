@@ -99,23 +99,9 @@ public:
 
     void sleep(useconds_t usecs) {
         version (Windows) {
-            import core.sys.windows.windef : HANDLE, LARGE_INTEGER;
-            import core.sys.windows.winbase : CreateWaitableTimer, SetWaitableTimer,
-                WaitForSingleObject, CloseHandle, INFINITE;
+            import core.sys.windows.windows : Sleep;
 
-            /**
-             * Authors of this code snippet: cyi823
-             * https://www.c-plusplus.net/forum/topic/109539/usleep-unter-windows
-             */
-            HANDLE timer;
-            LARGE_INTEGER ft;
-
-            ft.QuadPart = -(10 * usecs);
-
-            timer = CreateWaitableTimer(null, true, null);
-            SetWaitableTimer(timer, &ft, 0, null, null, 0);
-            WaitForSingleObject(timer, INFINITE);
-            CloseHandle(timer);
+            Sleep(usecs / 1_000);
         }
         version (Posix) {
             import core.sys.posix.unistd : usleep;
@@ -126,8 +112,12 @@ public:
 
     void sleep(string op)(uint value)
             if (op == "usecs" || op == "msecs" || op == "seconds") {
-        static if (op == "usecs")
-            return this.sleep(value);
+        static if (op == "usecs") {
+            version (Windows)
+                assert(0, "Windows API does not support sleep in usecs");
+            version (Posix)
+                return this.sleep(value);
+        }
         static if (op == "msecs")
             return this.sleep(value * 1_000);
         static if (op == "seconds")
@@ -150,14 +140,16 @@ public:
         printf("#1: Elapsed time: %lu usecs\n", sw.elapsed!"usecs");
     }
 
-    {
-        auto sw = StopWatch(true);
+    version (Posix) {
+        {
+            auto sw = StopWatch(true);
 
-        sw.sleep!"usecs"(10);
-        assert(sw.elapsed!"usecs" >= 10);
-        sw.stop();
+            sw.sleep!"usecs"(10);
+            assert(sw.elapsed!"usecs" >= 10);
+            sw.stop();
 
-        printf("#2: Elapsed time: %lu usecs\n", sw.elapsed!"usecs");
+            printf("#2: Elapsed time: %lu usecs\n", sw.elapsed!"usecs");
+        }
     }
 
     {
