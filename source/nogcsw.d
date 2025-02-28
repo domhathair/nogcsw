@@ -100,7 +100,8 @@ public:
     void sleep(useconds_t usecs) {
         version (Windows) {
             import core.sys.windows.windef : HANDLE, LARGE_INTEGER;
-            import core.sys.windows.winbase : CreateWaitableTimer, SetWaitableTimer, WaitForSingleObject, CloseHandle;
+            import core.sys.windows.winbase : CreateWaitableTimer, SetWaitableTimer,
+                WaitForSingleObject, CloseHandle, INFINITE;
 
             /**
              * Authors of this code snippet: cyi823
@@ -111,8 +112,8 @@ public:
 
             ft.QuadPart = -(10 * usecs);
 
-            timer = CreateWaitableTimer(NULL, TRUE, NULL);
-            SetWaitableTimer(timer, &ft, 0, NULL, NULL, 0);
+            timer = CreateWaitableTimer(null, true, null);
+            SetWaitableTimer(timer, &ft, 0, null, null, 0);
             WaitForSingleObject(timer, INFINITE);
             CloseHandle(timer);
         }
