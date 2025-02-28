@@ -1,5 +1,5 @@
 # nogcsw
-Simple stopwatch timer implementation for D (-betterC, @nogc). Actually, this is a simplified betterC port of druntime/blob/master/src/rt/aaA.d
+Simple stopwatch timer implementation for D (-betterC, @nogc)
 
 ## Use below subconfiguration for betterC in your dub.json
 ```json
