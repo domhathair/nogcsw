@@ -144,7 +144,6 @@ public:
 
         sw.sleep!"seconds"(1);
         assert(sw.elapsed!"seconds" == 1);
-
         sw.stop();
 
         printf("#1: Elapsed time: %lu usecs\n", sw.elapsed!"usecs");
@@ -155,7 +154,6 @@ public:
 
         sw.sleep!"usecs"(10);
         assert(sw.elapsed!"usecs" >= 10);
-
         sw.stop();
 
         printf("#2: Elapsed time: %lu usecs\n", sw.elapsed!"usecs");
