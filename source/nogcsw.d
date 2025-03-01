@@ -22,7 +22,7 @@ private align(8):
             long tv_usec;
         }
 
-        extern (C) int gettimeofday(timeval* tp, void* tzp) @nogc nothrow {
+        extern (C) int gettimeofday(timeval* tp, void* tzp) {
             import core.sys.windows.winbase : FILETIME, SYSTEMTIME, GetSystemTime, SystemTimeToFileTime;
 
             /**
@@ -31,7 +31,9 @@ private align(8):
              * This magic number is the number of 100 nanosecond intervals since January 1, 1601 (UTC)
              * until 00:00:00 January 1, 1970
              */
-            static const ulong EPOCH = 116_444_736_000_000_000UL;
+            immutable enum : long {
+                EPOCH = 116_444_736_000_000_000
+            }
 
             SYSTEMTIME system_time;
             FILETIME file_time;
@@ -39,16 +41,15 @@ private align(8):
             GetSystemTime(&system_time);
             SystemTimeToFileTime(&system_time, &file_time);
 
-            ulong time = cast(ulong)file_time.dwLowDateTime;
-            time += cast(ulong)file_time.dwHighDateTime << 32;
+            long time = cast(long)file_time.dwLowDateTime;
+            time += cast(long)file_time.dwHighDateTime << 32;
 
-            tp.tv_sec = cast(long)((time - EPOCH) / 10_000_000L);
+            tp.tv_sec = cast(long)((time - EPOCH) / 10_000_000);
             tp.tv_usec = cast(long)(system_time.wMilliseconds * 1_000);
 
             return 0;
         }
     }
-
     version (Posix) import core.sys.posix.sys.time : timeval, gettimeofday;
 
 public:
@@ -75,7 +76,7 @@ public:
     @property bool running() pure =>
         this.started;
 
-    @property ulong elapsed() {
+    @property long elapsed() {
         if (this.started) {
             gettimeofday(&this.timeEnd, null),
             this.timeMeasured =
@@ -89,9 +90,9 @@ public:
             if (op == "usecs" || op == "msecs" || op == "seconds") {
         static if (op == "usecs")
             return this.elapsed();
-        static if (op == "msecs")
+        else static if (op == "msecs")
             return this.elapsed() / 1_000;
-        static if (op == "seconds")
+        else static if (op == "seconds")
             return this.elapsed() / 1_000_000;
     }
 
@@ -118,10 +119,12 @@ public:
             version (Posix)
                 return this.sleep(value);
         }
-        static if (op == "msecs")
+        static if (op == "msecs") {
             return this.sleep(value * 1_000);
-        static if (op == "seconds")
+        }
+        static if (op == "seconds") {
             return this.sleep(value * 1_000_000);
+        }
     }
 }
 
@@ -155,11 +158,26 @@ public:
     {
         auto sw = StopWatch(true);
 
-        sw.sleep!"msecs"(2);
-        assert(sw.elapsed!"msecs" == 2);
+        sw.sleep!"msecs"(200);
+        assert(sw.elapsed!"msecs" >= 200);
         assert(sw.running() == true);
         sw.stop();
 
         printf("#3: Elapsed time: %lu usecs\n", sw.elapsed!"usecs");
+    }
+
+    {
+        void delay(StopWatch.useconds_t usecs) {
+            auto sw = StopWatch(true);
+            while (sw.elapsed!"usecs" < usecs)
+                cast(void)null; /* NOP */
+            sw.stop();
+        }
+
+        auto sw = StopWatch(true);
+        delay(1337);
+        assert(sw.elapsed!"usecs" >= 1337);
+
+        printf("#4: Elapsed time: %lu usecs\n", sw.elapsed!"usecs");
     }
 }
